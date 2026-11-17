@@ -1,0 +1,33 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/target/
+
+# Build output
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Backup frontend folder
+frontend_backup/
+
+# Uploaded user documents and test files
+backend/uploads/
+backend/uploads/**
+
+# Old TypeScript source backups
+frontend/typescript_old/
