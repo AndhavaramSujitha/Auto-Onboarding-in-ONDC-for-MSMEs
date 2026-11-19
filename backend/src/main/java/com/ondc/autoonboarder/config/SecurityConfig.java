@@ -16,6 +16,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableMethodSecurity
@@ -29,30 +34,33 @@ public class SecurityConfig {
             throws Exception {
 
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
             .csrf(csrf -> csrf.disable())
 
             .sessionManagement(session ->
-                session.sessionCreationPolicy(
-                    SessionCreationPolicy.STATELESS
-                )
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
             .authorizeHttpRequests(auth -> auth
 
-                // Allow CORS preflight requests
+                // CORS preflight
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // Application home and health check
+                .requestMatchers("/", "/api", "/api/", "/api/health").permitAll()
 
                 // Public authentication APIs
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
 
-                // Allow Spring error endpoint
+                // Error page
                 .requestMatchers("/error").permitAll()
 
-                // ONDC callbacks - local testing only
+                // ONDC callbacks
                 .requestMatchers("/ondc/**").permitAll()
 
-                // All remaining APIs require authentication
+                // All other APIs require JWT
                 .anyRequest().authenticated()
             )
 
@@ -62,6 +70,29 @@ public class SecurityConfig {
             );
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+
+        configuration.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+        ));
+
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+
+        configuration.setAllowCredentials(false);
+
+        UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 
     @Bean

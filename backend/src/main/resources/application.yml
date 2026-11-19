@@ -1,7 +1,13 @@
 
+server:
+  port: ${PORT:8081}
+  servlet:
+    context-path: /api
+  error:
+    include-message: always
+    include-binding-errors: always
+
 spring:
-  config:
-    import: optional:classpath:/application-dev.yml
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/ondc_auto_onboarder}
@@ -11,20 +17,16 @@ app:
     secret: ${JWT_SECRET:ONDC-AutoOnboarder-Dev-Secret-Key-2026-32Bytes-Minimum}
     expirationMs: ${JWT_EXPIRATION_MS:86400000}
 
-  ocr:
-    tesseract-data-path: "${TESSERACT_DATA_PATH:C:/Program Files/Tesseract-OCR/tessdata}"
+ocr:
+  tesseract-data-path: ${TESSERACT_DATA_PATH:C:/Program Files/Tesseract-OCR/tessdata}
 
-server:
-  port: ${PORT:8081}
-  servlet:
-    context-path: /api
+groq:
+  api:
+    key: ${GROQ_API_KEY:}
 
 logging:
   level:
     root: INFO
     org.springframework: INFO
-    org.springframework.security: DEBUG
-
-groq:
-  api:
-    key: ${GROQ_API_KEY:}
+    org.springframework.security: INFO
+    org.springframework.data.mongodb: INFO
