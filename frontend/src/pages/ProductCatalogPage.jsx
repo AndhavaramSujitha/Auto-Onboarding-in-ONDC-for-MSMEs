@@ -340,17 +340,14 @@ const ProductCatalogPage = () => {
     setSuccessMessage(null);
 
     try {
-      const updatedProduct = await productService.updateProduct(
-        product.id,
-        { ...product, status: 'PUBLISHED' }
-      );
+      const updatedProduct = await productService.publishProduct(product.id);
 
       setProducts((previousProducts) =>
-        previousProducts.map((item) =>
-          item.id === product.id
-            ? { ...item, ...updatedProduct, status: 'PUBLISHED' }
+    previousProducts.map((item) =>
+        item.id === product.id
+            ? updatedProduct
             : item
-        )
+    )
       );
 
       setSuccessMessage(`Product "${product.productName}" published successfully!`);

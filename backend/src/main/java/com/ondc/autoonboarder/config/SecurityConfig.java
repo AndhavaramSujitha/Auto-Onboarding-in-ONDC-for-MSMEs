@@ -49,6 +49,9 @@ public class SecurityConfig {
                 // Allow Spring error endpoint
                 .requestMatchers("/error").permitAll()
 
+                // ONDC callbacks - local testing only
+                .requestMatchers("/ondc/**").permitAll()
+
                 // All remaining APIs require authentication
                 .anyRequest().authenticated()
             )

@@ -1,7 +1,7 @@
 
 import api from './api';
 
-export const productService = {
+const productService = {
 
     // Get all products
     async listProducts() {
@@ -27,12 +27,26 @@ export const productService = {
         return response.data;
     },
 
+    // Publish product
+    async publishProduct(id) {
+        const response = await api.post(`/products/${id}/publish`);
+        return response.data;
+    },
+
+    // Run backend compliance audit
+    async runComplianceAudit(id) {
+        const response = await api.post(
+            `/products/${id}/compliance-audit`
+        );
+        return response.data;
+    },
+
     // Delete product
     async deleteProduct(id) {
         await api.delete(`/products/${id}`);
     },
 
-    // Generate AI product catalog using description and optional image
+    // Generate AI product catalog
     async generateCatalog(description, image) {
         const formData = new FormData();
 
@@ -50,7 +64,7 @@ export const productService = {
         return response.data;
     },
 
-    // Upload product image (existing feature)
+    // Upload product image
     async uploadImage(file) {
         const formData = new FormData();
         formData.append('file', file);
@@ -74,4 +88,5 @@ export const productService = {
     },
 };
 
+export { productService };
 export default productService;

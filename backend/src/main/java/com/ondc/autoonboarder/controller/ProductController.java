@@ -38,6 +38,7 @@ public class ProductController {
     @Autowired
     private BusinessRepository businessRepository;
 
+    // Resolve logged-in user's business ID
     private String resolveBusinessId(Authentication auth) {
 
         String userId = auth != null
@@ -50,7 +51,8 @@ public class ProductController {
 
         return businessRepository.findByOwnerId(userId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Business not found for user"))
+                        new IllegalArgumentException(
+                                "Business not found for user"))
                 .getId();
     }
 
@@ -61,20 +63,17 @@ public class ProductController {
     )
     public ResponseEntity<String> generateCatalog(
             @RequestParam("description") String description,
-            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "image", required = false)
+            MultipartFile image,
             Authentication auth) {
 
-        // Verify authenticated seller has a business
         resolveBusinessId(auth);
 
         if (description == null || description.isBlank()) {
             throw new IllegalArgumentException(
-                    "Product description is required"
-            );
+                    "Product description is required");
         }
 
-        // Generate catalog details using Groq AI.
-        // Product is NOT saved here.
         String generatedCatalog =
                 groqService.generateProductCatalog(description, image);
 
@@ -88,12 +87,13 @@ public class ProductController {
             Authentication auth) {
 
         String businessId = resolveBusinessId(auth);
+
         Product p = productService.createProduct(req, businessId);
 
         return ResponseEntity.ok(toResponse(p));
     }
 
-    // List products
+    // List all products
     @GetMapping
     public ResponseEntity<List<ProductResponse>> listProducts(
             Authentication auth) {
@@ -110,13 +110,30 @@ public class ProductController {
         return ResponseEntity.ok(resp);
     }
 
-    // Get product
+    // Get products eligible for ONDC catalogue preparation
+    @GetMapping("/ondc-catalog")
+    public ResponseEntity<List<ProductResponse>> getOndcCatalog(
+            Authentication auth) {
+
+        String businessId = resolveBusinessId(auth);
+
+        List<ProductResponse> products =
+                productService.getPublishedProductsByBusiness(businessId)
+                        .stream()
+                        .map(this::toResponse)
+                        .collect(Collectors.toList());
+
+        return ResponseEntity.ok(products);
+    }
+
+    // Get single product
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProduct(
             @PathVariable String id,
             Authentication auth) {
 
         String businessId = resolveBusinessId(auth);
+
         Product p = productService.getProduct(id, businessId);
 
         return ResponseEntity.ok(toResponse(p));
@@ -131,7 +148,36 @@ public class ProductController {
 
         String businessId = resolveBusinessId(auth);
 
-        Product p = productService.updateProduct(id, req, businessId);
+        Product p =
+                productService.updateProduct(id, req, businessId);
+
+        return ResponseEntity.ok(toResponse(p));
+    }
+
+    // Publish product
+    @PostMapping("/{id}/publish")
+    public ResponseEntity<ProductResponse> publishProduct(
+            @PathVariable String id,
+            Authentication auth) {
+
+        String businessId = resolveBusinessId(auth);
+
+        Product p =
+                productService.publishProduct(id, businessId);
+
+        return ResponseEntity.ok(toResponse(p));
+    }
+
+    // Run server-side compliance audit
+    @PostMapping("/{id}/compliance-audit")
+    public ResponseEntity<ProductResponse> runComplianceAudit(
+            @PathVariable String id,
+            Authentication auth) {
+
+        String businessId = resolveBusinessId(auth);
+
+        Product p =
+                productService.runComplianceAudit(id, businessId);
 
         return ResponseEntity.ok(toResponse(p));
     }
@@ -149,7 +195,7 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    // Upload product image (existing image analysis feature)
+    // Upload product image
     @PostMapping("/image")
     public ResponseEntity<ImageAnalysisResponse> uploadImage(
             @RequestParam("file") MultipartFile file,
@@ -191,6 +237,7 @@ public class ProductController {
         return ResponseEntity.ok(resp);
     }
 
+    // Convert Product entity to response
     private ProductResponse toResponse(Product p) {
 
         return new ProductResponse(

@@ -28,8 +28,8 @@ public class GroqService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${GROQ_API_KEY:}")
-    private String apiKey;
+    @Value("${groq.api.key:}")
+private String apiKey;
 
     private static final String GROQ_URL =
             "https://api.groq.com/openai/v1/chat/completions";
