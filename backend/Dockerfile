@@ -14,11 +14,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     libtesseract5 \
-    liblept5 \
     libgomp1 \
     poppler-utils \
     && rm -rf /var/lib/apt/lists/*
-
 ENV TESSERACT_DATA_PATH=/usr/share/tesseract-ocr/5/tessdata
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 
